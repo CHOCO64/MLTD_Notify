@@ -30,8 +30,8 @@ nohup python3 -u bot.py >log.log 2>&1 &
 ## 存放資料說明
 下列的檔案都是在機器人執行時會自動產生的檔案
 
-data/channle.json <=註冊要讓機器人發提醒的頻道
-data/mltd.json <=目前最新的活動資料
+- data/channle.json 註冊要讓機器人發提醒的頻道
+- data/mltd.json 目前最新的活動資料
 
 ## 相依套件
 
