@@ -85,9 +85,9 @@ class Task(commands.Cog):
         else:
             BoostDate = TZ2UTC8(mltd.MLTD_Data["boostBeginAt"])
             
-            if BoostDate.date == datetime.now().date():
+            if BoostDate.date() == datetime.now().date():
                 embed=discord.Embed(title="打活動了!! 下午Boost!!", color=0x81d8d0)
-            elif BoostDate.date > datetime.now().date():
+            elif BoostDate.date() < datetime.now().date():
                 embed=discord.Embed(title="打活動了!! Boost Now!!", color=0x81d8d0)
             else:
                 embed=discord.Embed(title="打活動了!!", color=0x81d8d0)
