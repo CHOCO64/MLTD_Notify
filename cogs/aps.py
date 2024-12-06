@@ -5,6 +5,7 @@ from discord.ext import commands
 from datetime import datetime,timezone,timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import json
+import time
 
 from module.mltd import mltd
 from module.channleList import List
@@ -44,6 +45,7 @@ class Task(commands.Cog):
     async def Set_task(self):
         #活動頁關閉時開始每10分鐘check一次
         Update_time = TZ2UTC8(mltd.MLTD_Data["pageClosedAt"])
+        Update_time = Update_time + timedelta(minutes=2)
         job = self.bgTask.add_job(self.Update_task,'interval', start_date=Update_time, minutes=10)
         self.UpdateTaskID = job.id
         
@@ -51,11 +53,8 @@ class Task(commands.Cog):
         if mltd.event_check():
             goodTime =  TZ2UTC8(mltd.MLTD_Data["beginAt"])
             goodTime2 = TZ2UTC8(mltd.MLTD_Data["endAt"])
-            goodTime3 = goodTime2 - timedelta(days=1)
             #活動期間,每天九點發送提醒
-            self.bgTask.add_job(self.Notify_task, 'cron',start_date=goodTime,end_date=goodTime3, hour='9')
-            #最後一天
-            self.bgTask.add_job(self.FinalDay_Notify_task, 'date',run_date=goodTime2.replace(hour = 9))
+            self.bgTask.add_job(self.Notify_task, 'cron',start_date=goodTime,end_date=goodTime2, hour='9')
             
     async def Update_task(self):
         await self.bot.wait_until_ready()
@@ -68,33 +67,34 @@ class Task(commands.Cog):
             #第一天的提醒
             if mltd.event_check():
                 await self.Notify_task()                  
-    
-    async def FinalDay_Notify_task(self):
-        print("FinalDay_Notify_task",datetime.now())
-        await self.bot.wait_until_ready()
-        embed=discord.Embed(title="今天最後一天了!!", color=0x81d8d0)
-        embed.add_field(name=mltd.MLTD_Data['name'], value="", inline=False)
-        
-        await self.Broadcast(embed)
         
     async def Notify_task(self):
         print("Notify_task",datetime.now())
         await self.bot.wait_until_ready()
         if mltd.MLTD_Data["boostBeginAt"] == None:
+            #For debug用的test command
+            EndDate = TZ2UTC8(mltd.MLTD_Data["endAt"])
+            day_remain = (EndDate.date() - datetime.now().date()).days
             embed=discord.Embed(title="打活動了!!", color=0x81d8d0)
+            embed.add_field(name=mltd.MLTD_Data['name'], value="活動還剩: "+str(day_remain)+"天\n最後一天: "+mltd.MLTD_Data["endAt"][:10], inline=False)
         else:
             BoostDate = TZ2UTC8(mltd.MLTD_Data["boostBeginAt"])
             
+            EndDate = TZ2UTC8(mltd.MLTD_Data["endAt"])
+            day_remain = (EndDate.date() - datetime.now().date()).days
+            
             if BoostDate.date() == datetime.now().date():
                 embed=discord.Embed(title="打活動了!! 下午Boost!!", color=0x81d8d0)
+                embed.add_field(name=mltd.MLTD_Data['name'], value="活動還剩: "+str(day_remain)+"天\n最後一天: "+mltd.MLTD_Data["endAt"][:10], inline=False)
             elif BoostDate.date() < datetime.now().date():
                 embed=discord.Embed(title="打活動了!! Boost Now!!", color=0x81d8d0)
-            else:
+                embed.add_field(name=mltd.MLTD_Data['name'], value="活動還剩: "+str(day_remain)+"天\n最後一天: "+mltd.MLTD_Data["endAt"][:10], inline=False)
+            elif EndDate.date() == datetime.now().date():
+                embed=discord.Embed(title="今天最後一天了!!", color=0x81d8d0)
+                embed.add_field(name=mltd.MLTD_Data['name'], value="結束時間: "+EndDate.strftime("%H:%M:%S"), inline=False)
+            else :
                 embed=discord.Embed(title="打活動了!!", color=0x81d8d0)
-            
-        EndDate = TZ2UTC8(mltd.MLTD_Data["endAt"])
-        day_remain = (EndDate.date() - datetime.now().date()).days    
-        embed.add_field(name=mltd.MLTD_Data['name'], value="活動還剩: "+str(day_remain)+"天\n最後一天: "+mltd.MLTD_Data["endAt"][:10], inline=False)
+                embed.add_field(name=mltd.MLTD_Data['name'], value="活動還剩: "+str(day_remain)+"天\n最後一天: "+mltd.MLTD_Data["endAt"][:10], inline=False)
         
         await self.Broadcast(embed)
         
@@ -103,7 +103,12 @@ class Task(commands.Cog):
         ListLen = len(List.List)
         while count < ListLen:
             channel = self.bot.get_channel(List.List[count])
-            await channel.send(embed=embed)
+            try:
+                await channel.send(embed=embed)
+            except:
+                #10秒後再傳送一次
+                time.sleep(10)
+                await channel.send(embed=embed)
             count += 1
             
     @commands.command()
