@@ -86,12 +86,12 @@ class Task(commands.Cog):
             if BoostDate.date() == datetime.now().date():
                 embed=discord.Embed(title="打活動了!! 下午Boost!!", color=0x81d8d0)
                 embed.add_field(name=mltd.MLTD_Data['name'], value="活動還剩: "+str(day_remain)+"天\n最後一天: "+mltd.MLTD_Data["endAt"][:10], inline=False)
+            elif day_remain == 0:
+                embed=discord.Embed(title="今天是最後一天了!!", color=0x81d8d0)
+                embed.add_field(name=mltd.MLTD_Data['name'], value="結束時間: "+EndDate.strftime("%H:%M:%S"), inline=False)
             elif BoostDate.date() < datetime.now().date():
                 embed=discord.Embed(title="打活動了!! Boost Now!!", color=0x81d8d0)
                 embed.add_field(name=mltd.MLTD_Data['name'], value="活動還剩: "+str(day_remain)+"天\n最後一天: "+mltd.MLTD_Data["endAt"][:10], inline=False)
-            elif EndDate.date() == datetime.now().date():
-                embed=discord.Embed(title="今天最後一天了!!", color=0x81d8d0)
-                embed.add_field(name=mltd.MLTD_Data['name'], value="結束時間: "+EndDate.strftime("%H:%M:%S"), inline=False)
             else :
                 embed=discord.Embed(title="打活動了!!", color=0x81d8d0)
                 embed.add_field(name=mltd.MLTD_Data['name'], value="活動還剩: "+str(day_remain)+"天\n最後一天: "+mltd.MLTD_Data["endAt"][:10], inline=False)
@@ -113,11 +113,8 @@ class Task(commands.Cog):
             
     @commands.command()
     @commands.is_owner()
-    async def test(self, ctx, tt:int):
-        if tt == 0:
-            await self.Notify_task()
-        else:
-            await self.FinalDay_Notify_task()
+    async def test(self, ctx):
+        await self.Notify_task()
 
     @commands.command()
     @commands.is_owner()
