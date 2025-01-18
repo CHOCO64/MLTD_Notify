@@ -24,7 +24,7 @@ config.json
 ```json
 {
     "botToken": "",
-	"listen_channle":1234567890
+    "listen_channle":1234567890
 }
 ```
 
