@@ -21,11 +21,11 @@ class Channel:
         with open("./data/channle.json", "w", encoding="utf8") as channleFile:
             json.dump(self.List, channleFile)
  
-    #新增channle,並save至json  
+    #鏂板channle,涓ave鑷砵son  
     async def add(self, channle:int):
         print("[Start Channel.Add()]")
         if channle in self.List:
-            #已新增過的就直接return
+            #宸叉柊澧為亷鐨勫氨鐩存帴return
             print("return False")
             return False
         else:
@@ -34,7 +34,7 @@ class Channel:
             print("return True")
             return True
     
-    #刪除channle,並save至json 
+    #鍒櫎channle,涓ave鑷砵son 
     async def delete(self, channle:int):
         print("[Start Channel.delete()]")
         if channle in self.List:
@@ -43,7 +43,7 @@ class Channel:
             print("return True")
             return True
         else:
-            #不存在清單內的就直接return
+            #涓嶅瓨鍦ㄦ竻鍠収鐨勫氨鐩存帴return
             print("return False")
             return False
         
