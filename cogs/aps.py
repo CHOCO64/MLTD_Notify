@@ -57,6 +57,7 @@ class Task(commands.Cog):
     #MLTD資料更新任務        
     async def Update_task(self):
         await self.bot.wait_until_ready()
+        print("[Update_task]",datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S"))
         if await mltd.Get_data_from_API():
             #活動資料更新後取消目前的Update task
             self.bgTask.remove_job(self.UpdateTaskID)
@@ -69,7 +70,7 @@ class Task(commands.Cog):
                 
     #活動提醒        
     async def Notify_task(self):
-        print("Notify_task",datetime.now())
+        print("[Notify_task]",datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S"))
         await self.bot.wait_until_ready()
         if mltd.MLTD_Data["boostBeginAt"] == None:
             #For debug用的test command
