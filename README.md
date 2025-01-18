@@ -27,11 +27,12 @@ nohup python3 -u bot.py >log.log 2>&1 &
 ```
 會產生log.log的log檔
 
+第一次執行機器人的時候需要再discord下!sync的指令更新slash指令清單到discord上
+
 ## 存放資料說明
 下列的檔案都是在機器人執行時會自動產生的檔案
 
 - data/channle.json 註冊要讓機器人發提醒的頻道
-- data/mltd.json 目前最新的活動資料
 
 ## 相依套件
 
