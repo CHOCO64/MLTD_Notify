@@ -11,8 +11,10 @@ class Bot_Event(commands.Cog):
     #被伺服器移除時刪除所有註冊頻道
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
+        print("[Start on_guild_remove Event]")
         for channel in guild.text_channels:
             if channel.id in List.List:
+                print(f"Remove {channel.id}")
                 await List.delete(channel.id)
                 
 async def setup(bot: commands.Bot):

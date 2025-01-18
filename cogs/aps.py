@@ -41,9 +41,11 @@ class Task(commands.Cog):
     #reload/unload aps.py時取消所有提醒    
     async def cog_unload(self):
         self.bgTask.shutdown()
-        
+    
+    #設定提醒和資料更新的job
     async def Set_task(self):
-        #活動頁關閉時開始每10分鐘check一次
+        print("[Set_task]",datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S"))
+        #活動頁關閉兩分鐘後,每10分鐘check一次
         Update_time = TZ2UTC8(mltd.MLTD_Data["pageClosedAt"])
         Update_time = Update_time + timedelta(minutes=2)
         job = self.bgTask.add_job(self.Update_task,'interval', start_date=Update_time, minutes=10)
@@ -56,6 +58,7 @@ class Task(commands.Cog):
             #活動期間,每天九點發送提醒
             self.bgTask.add_job(self.Notify_task, 'cron',start_date=goodTime,end_date=goodTime2, hour='9')
             
+    #MLTD資料更新任務        
     async def Update_task(self):
         await self.bot.wait_until_ready()
         if(await mltd.Get_data_from_API()):
@@ -68,6 +71,7 @@ class Task(commands.Cog):
             if mltd.event_check():
                 await self.Notify_task()                  
         
+    #活動提醒        
     async def Notify_task(self):
         print("Notify_task",datetime.now())
         await self.bot.wait_until_ready()
@@ -97,7 +101,8 @@ class Task(commands.Cog):
                 embed.add_field(name=mltd.MLTD_Data['name'], value="活動還剩: "+str(day_remain)+"天\n最後一天: "+mltd.MLTD_Data["endAt"][:10], inline=False)
         
         await self.Broadcast(embed)
-        
+    
+    #channel廣播    
     async def Broadcast(self, embed):
         count = 0
         ListLen = len(List.List)
@@ -110,10 +115,13 @@ class Task(commands.Cog):
                 time.sleep(10)
                 await channel.send(embed=embed)
             count += 1
-            
+
+#以下皆是debug用command, 只有機器人owner可以執行
+    
     @commands.command()
     @commands.is_owner()
     async def test(self, ctx):
+        print("Test command")
         await self.Notify_task()
 
     @commands.command()
@@ -149,7 +157,7 @@ class Task(commands.Cog):
             count += 1
             await ctx.send(f"{count}. {job} ID:{job.id}")
         
-
+#以上皆是debug用command, 只有機器人owner可以執行  
                 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Task(bot))
