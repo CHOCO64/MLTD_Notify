@@ -52,7 +52,7 @@ class Task(commands.Cog):
             goodTime =  TZ2UTC8(mltd.MLTD_Data["beginAt"])
             goodTime2 = TZ2UTC8(mltd.MLTD_Data["endAt"])
             #活動期間,每天九點發送提醒
-            self.bgTask.add_job(self.Notify_task, 'cron',start_date=goodTime,end_date=goodTime2, hour='9')
+            self.bgTask.add_job(self.Notify_task, 'cron',start_date=goodTime,end_date=goodTime2, hour='9',args=[False])
             
     #MLTD資料更新任務        
     async def Update_task(self):
@@ -66,10 +66,10 @@ class Task(commands.Cog):
             
             #第一天的提醒
             if await mltd.Event_check():
-                await self.Notify_task()    
+                await self.Notify_task(False)    
                 
     #活動提醒        
-    async def Notify_task(self):
+    async def Notify_task(self, debug:bool):
         print("[Notify_task]",datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S"))
         await self.bot.wait_until_ready()
         if mltd.MLTD_Data["boostBeginAt"] == None:
@@ -96,8 +96,11 @@ class Task(commands.Cog):
             else :
                 embed=discord.Embed(title="打活動了!!", color=0x81d8d0)
                 embed.add_field(name=mltd.MLTD_Data['name'], value="活動還剩: "+str(day_remain)+"天\n最後一天: "+mltd.MLTD_Data["endAt"][:10], inline=False)
-        
-        await self.Broadcast(embed)
+        if debug:
+            channel = self.bot.get_channel(List.Listen)
+            await channel.send(embed=embed)
+        else:
+            await self.Broadcast(embed)
     
     #channel廣播    
     async def Broadcast(self, embed):
@@ -119,7 +122,10 @@ class Task(commands.Cog):
     @commands.is_owner()
     async def test(self, ctx):
         print("Test command")
-        await self.Notify_task()
+        if List.Listen == None:
+            await ctx.send(f"無設定監聽頻道")
+        else:
+            await self.Notify_task(True)
 
     @commands.command()
     @commands.is_owner()

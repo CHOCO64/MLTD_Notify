@@ -5,6 +5,7 @@ import os
 class Channel:
     def __init__(self):
         self.List = []
+        self.Listen = None
     
     #load data from json    
     async def load(self):
@@ -14,6 +15,11 @@ class Channel:
                 self.List = json.load(channleFile)
         else:
             await self.Save()
+            
+        with open("./config.json",mode="r",encoding="utf8") as configFile:
+            data = json.load(configFile)
+            if "listen_channle" in data:
+                self.Listen = data["listen_channle"]
  
     #Save channle data to json 
     async def Save(self):
