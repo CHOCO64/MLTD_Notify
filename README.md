@@ -20,6 +20,14 @@ config.json
 ```
 只要填入機器人的token就好了
 
+若需要設定!test指令專用的監聽頻道,則需要如下再增加頻道設定
+```json
+{
+    "botToken": "",
+	"listen_channle":1234567890
+}
+```
+
 ## 部署方法
 在Linux server上執行
 ```
