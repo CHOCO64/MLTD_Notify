@@ -23,11 +23,7 @@ class Task(commands.Cog):
 
     async def cog_load(self):
         #MLTD event資料 初始化
-        try:
-            await mltd.load()
-        except Exception as ex:
-            print(ex)
-            os._exit(0)
+        await mltd.Get_data_from_API()
             
         #讀取已註冊頻道
         await List.load()
@@ -52,7 +48,7 @@ class Task(commands.Cog):
         self.UpdateTaskID = job.id
         
         #設定下一個活動提醒
-        if mltd.event_check():
+        if await mltd.Event_check():
             goodTime =  TZ2UTC8(mltd.MLTD_Data["beginAt"])
             goodTime2 = TZ2UTC8(mltd.MLTD_Data["endAt"])
             #活動期間,每天九點發送提醒
@@ -61,16 +57,16 @@ class Task(commands.Cog):
     #MLTD資料更新任務        
     async def Update_task(self):
         await self.bot.wait_until_ready()
-        if(await mltd.Get_data_from_API()):
+        if await mltd.Get_data_from_API():
             #活動資料更新後取消目前的Update task
             self.bgTask.remove_job(self.UpdateTaskID)
             #設定新任務
             await self.Set_task()
             
             #第一天的提醒
-            if mltd.event_check():
-                await self.Notify_task()                  
-        
+            if await mltd.Event_check():
+                await self.Notify_task()    
+                
     #活動提醒        
     async def Notify_task(self):
         print("Notify_task",datetime.now())
@@ -123,6 +119,11 @@ class Task(commands.Cog):
     async def test(self, ctx):
         print("Test command")
         await self.Notify_task()
+
+    @commands.command()
+    @commands.is_owner()
+    async def display(self, ctx):
+        await ctx.send(mltd.MLTD_Data)
 
     @commands.command()
     @commands.is_owner()
